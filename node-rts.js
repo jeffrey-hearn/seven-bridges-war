@@ -140,7 +140,7 @@ Planet.prototype.drawEdgeConnections = function(){
 		canvas.beginPath();
 		canvas.moveTo( thisCoords.x, thisCoords.y );
 		canvas.lineTo( neighborCoords.x, neighborCoords.y );
-		canvas.lineWidth = 1;
+		canvas.lineWidth = 0.2;
 		canvas.stroke();
 	}
 }
