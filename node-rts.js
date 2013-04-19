@@ -4,7 +4,7 @@ var	  CANVAS_WIDTH = 700
 	, CANVAS_HEIGHT = 500
 	, FPS = 30
 	, GAME_SPEED = 2
-	, ORBITAL_SPEED = 0.005
+	, ORBITAL_SPEED = 0.008
 	, PLANET_RADIUS = 20;
 
 // Add canvas to page
@@ -32,7 +32,7 @@ function draw() {
 	canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
 	for( var x = 0; x < testNodes.length; x++ ){
-		testNodes[x].draw();
+		testNodes[x].planetRenderer.draw();
 	}
 }
 
@@ -44,36 +44,47 @@ function Player(pri,sec) {
 
 // Planet class
 function Planet( player, x, y){
+	// Planet attributes
 	this.owner = player;
+	this.posture = 'peaceful';
+	this.postureCompletion = 1;
+	this.neighbors = new Array();
+	this.power = 1;
+	this.powerGrowth = 0;
+
+	this.planetRenderer = new PlanetRenderer( this, x, y );
+}
+
+function PlanetRenderer( planet, x, y ){
+	this.planet = planet;
+	// Rendering Suff
 	this.planetRadius = PLANET_RADIUS;
 	this.x = x;
 	this.y = y;
-	this.neighbors = new Array();
 	this.lowOrbit = PLANET_RADIUS + PLANET_RADIUS * 0.3;
 	this.highOrbit = PLANET_RADIUS + PLANET_RADIUS * 1;
 	this.midOrbit = (this.lowOrbit + this.highOrbit) / 2;
-	this.posture = 'peaceful';
 	this.orbiterAngles = new Array(16);
 	this.init();
 }
 
-Planet.prototype.init = function(){
+PlanetRenderer.prototype.init = function(){
 	this.initOrbiters();
 }
 
-Planet.prototype.initOrbiters = function(){
+PlanetRenderer.prototype.initOrbiters = function(){
 	for( var x = 0; x < this.orbiterAngles.length; x++ ){
 		this.orbiterAngles[x] = Math.random() * 2 * Math.PI;
 	}
 }
 
-Planet.prototype.ambience = function(){
+PlanetRenderer.prototype.ambience = function(){
 	if( this.posture == 'peaceful' ){
 		this.orbitOrbiter();
 	}
 }
 
-Planet.prototype.orbitOrbiter = function(){
+PlanetRenderer.prototype.orbitOrbiter = function(){
 	for( var x = 0; x < this.orbiterAngles.length; x++ ){
 		this.orbiterAngles[x] += ORBITAL_SPEED;
 		if ( this.orbiterAngles[x] > (2 * Math.PI) )
@@ -81,7 +92,7 @@ Planet.prototype.orbitOrbiter = function(){
 	}
 }
 
-Planet.prototype.drawOrbiters = function(){
+PlanetRenderer.prototype.drawOrbiters = function(){
 	if( this.posture == 'peaceful' ){
 		for( var x = 0; x < this.orbiterAngles.length; x++ ){
 			canvas.beginPath();
@@ -93,17 +104,17 @@ Planet.prototype.drawOrbiters = function(){
 	}
 }
 
-Planet.prototype.drawPlanet = function(){
+PlanetRenderer.prototype.drawPlanet = function(){
 	canvas.beginPath();
 	canvas.arc(this.x, this.y, this.planetRadius, 0, 2 * Math.PI, false);
-	canvas.fillStyle = this.owner.primaryColor;
+	canvas.fillStyle = this.planet.owner.primaryColor;
 	canvas.fill();
 	canvas.lineWidth = 3;
-	canvas.strokeStyle = this.owner.secondaryColor;
+	canvas.strokeStyle = this.planet.owner.secondaryColor;
 	canvas.stroke();
 }
 
-Planet.prototype.getEdgePoint = function( neighbor ){
+PlanetRenderer.prototype.getEdgePoint = function( neighbor ){
 	// Get the angle from this planet to the neighbor
 	var adj = this.x - neighbor.x;
 	var opp = this.y - neighbor.y;
@@ -121,9 +132,9 @@ Planet.prototype.getEdgePoint = function( neighbor ){
 	return { x: edgeX, y: edgeY };
 }
 
-Planet.prototype.drawEdgePoints = function(){
-	for ( var x = 0; x < this.neighbors.length; x++ ) {
-		var coords = this.getEdgePoint( this.neighbors[x] );
+PlanetRenderer.prototype.drawEdgePoints = function(){
+	for ( var x = 0; x < this.planet.neighbors.length; x++ ) {
+		var coords = this.getEdgePoint( this.planet.neighbors[x] );
 		canvas.beginPath();
 		canvas.arc( coords.x, coords.y, 4, 0, 2 * Math.PI, false );
 		canvas.fillStyle = this.owner.primaryColor;
@@ -131,10 +142,10 @@ Planet.prototype.drawEdgePoints = function(){
 	}
 }
 
-Planet.prototype.drawEdgeConnections = function(){
-	for ( var x = 0; x < this.neighbors.length; x++ ) {
-		var thisCoords = this.getEdgePoint( this.neighbors[x] );
-		var neighborCoords = this.neighbors[x].getEdgePoint( this );
+PlanetRenderer.prototype.drawEdgeConnections = function(){
+	for ( var x = 0; x < this.planet.neighbors.length; x++ ) {
+		var thisCoords = this.getEdgePoint( this.planet.neighbors[x] );
+		var neighborCoords = this.planet.neighbors[x].planetRenderer.getEdgePoint( this );
 
 		// Line connecting planets
 		canvas.beginPath();
@@ -145,7 +156,7 @@ Planet.prototype.drawEdgeConnections = function(){
 	}
 }
 
-Planet.prototype.draw = function(){
+PlanetRenderer.prototype.draw = function(){
 	this.ambience();
 	this.drawPlanet();
 	this.drawOrbiters();
@@ -168,4 +179,8 @@ testNodes[0].neighbors.push( testNodes[2] );
 testNodes[2].neighbors.push( testNodes[0] );
 console.log(testNodes);
 //testNodes[0].getEdgePoint( testNodes[1] );
+
+
+
+
 
