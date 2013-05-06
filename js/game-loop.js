@@ -29,6 +29,9 @@ $(document).ready(function() {
 		for( var x = 0; x < testNodes.length; x++ ){
 			testNodes[x].planetRenderer.draw();
 		}
+		for( var x = 0; x < testConns.length; x++ ){
+			testConns[x].connectionRenderer.draw();
+		}
 	}
 
 	function update() {
@@ -36,17 +39,19 @@ $(document).ready(function() {
 	}
 
 	var player1 = new Player("#9B59B6", "#8E44AD");
+
 	var testNodes = [];
 	testNodes.push( new Planet(player1,300,200) );
 	testNodes.push( new Planet(player1,450,100) );
 	testNodes.push( new Planet(player1,600,150) );
-	testNodes[0].neighbors.push( testNodes[1] );
-	testNodes[1].neighbors.push( testNodes[0] );
-	testNodes[2].neighbors.push( testNodes[1] );
-	testNodes[1].neighbors.push( testNodes[2] );
-	testNodes[0].neighbors.push( testNodes[2] );
-	testNodes[2].neighbors.push( testNodes[0] );
+
+	var testConns = [];
+	testConns.push( new Connection( testNodes[0], testNodes[1] ) );
+	testConns.push( new Connection( testNodes[1], testNodes[2] ) );
+	testConns.push( new Connection( testNodes[0], testNodes[2] ) );
+
 	console.log(testNodes);
+	console.log(testConns)
 	//testNodes[0].getEdgePoint( testNodes[1] );
 
 

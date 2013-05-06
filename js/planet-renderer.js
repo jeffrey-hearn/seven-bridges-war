@@ -12,6 +12,10 @@ function PlanetRenderer( planet, x, y ){
 	this.init();
 }
 
+PlanetRenderer.prototype.getCoords = function(){
+	return { x: this.x, y: this.y };
+}
+
 PlanetRenderer.prototype.init = function(){
 	this.initOrbiters();
 }
@@ -58,52 +62,8 @@ PlanetRenderer.prototype.drawPlanet = function(){
 	canvas.stroke();
 }
 
-PlanetRenderer.prototype.getEdgePoint = function( neighbor ){
-	// Get the angle from this planet to the neighbor
-	var adj = this.x - neighbor.x;
-	var opp = this.y - neighbor.y;
-	var theta = Math.atan( opp / adj );
-
-	// Adjust theta for signs not placing theta in the correct quadrent
-	if( adj > 0 && opp > 0 )
-		theta += Math.PI;
-	if( adj > 0 && opp < 0 )
-		theta += Math.PI;
-
-	// Triangulate coordinate
-	var edgeX = this.x + Math.cos( theta ) * this.highOrbit;
-	var edgeY = this.y + Math.sin( theta ) * this.highOrbit;
-	return { x: edgeX, y: edgeY };
-}
-
-PlanetRenderer.prototype.drawEdgePoints = function(){
-	for ( var x = 0; x < this.planet.neighbors.length; x++ ) {
-		var coords = this.getEdgePoint( this.planet.neighbors[x] );
-		canvas.beginPath();
-		canvas.arc( coords.x, coords.y, 4, 0, 2 * Math.PI, false );
-		canvas.fillStyle = this.owner.primaryColor;
-		canvas.fill();
-	}
-}
-
-PlanetRenderer.prototype.drawEdgeConnections = function(){
-	for ( var x = 0; x < this.planet.neighbors.length; x++ ) {
-		var thisCoords = this.getEdgePoint( this.planet.neighbors[x].planetRenderer );
-		var neighborCoords = this.planet.neighbors[x].planetRenderer.getEdgePoint( this.planet.planetRenderer );
-
-		// Line connecting planets
-		canvas.beginPath();
-		canvas.moveTo( thisCoords.x, thisCoords.y );
-		canvas.lineTo( neighborCoords.x, neighborCoords.y );
-		canvas.lineWidth = 0.2;
-		canvas.stroke();
-	}
-}
-
 PlanetRenderer.prototype.draw = function(){
 	this.ambience();
 	this.drawPlanet();
 	this.drawOrbiters();
-	//this.drawEdgePoints();
-	this.drawEdgeConnections();
 }
