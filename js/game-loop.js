@@ -5,17 +5,24 @@ $(document).ready(function() {
 	console.log('Starting up...');
 
 
+	/*
 	// Add canvas to page and make it a global variable
 	var canvasElement = $("<canvas width='" + CANVAS_WIDTH + "' height='" + CANVAS_HEIGHT + "'></canvas>");
 	window.canvas = canvasElement.get(0).getContext("2d");
 	canvasElement.appendTo('body');
+	*/
+
+	//var elem = document.getElementById('draw-shapes').children[0];
+	var params = { fullscreen: true };
+	var two = new Two(params).appendTo( $('body').get(0) );
 
 
-
+/*
 	// Render loop
 	setInterval(function() {
 		draw();
 	}, 1000/FPS);
+*/
 
 	// Game loop
 	setInterval( function(){
