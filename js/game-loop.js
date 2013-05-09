@@ -4,42 +4,14 @@ $(document).ready(function() {
 
 	console.log('Starting up...');
 
-
-	/*
-	// Add canvas to page and make it a global variable
-	var canvasElement = $("<canvas width='" + CANVAS_WIDTH + "' height='" + CANVAS_HEIGHT + "'></canvas>");
-	window.canvas = canvasElement.get(0).getContext("2d");
-	canvasElement.appendTo('body');
-	*/
-
 	//var elem = document.getElementById('draw-shapes').children[0];
-	var params = { fullscreen: true };
-	var two = new Two(params).appendTo( $('body').get(0) );
-
-
-/*
-	// Render loop
-	setInterval(function() {
-		draw();
-	}, 1000/FPS);
-*/
+	var params = { fullscreen: true, autostart: true };
+	window.two = new Two(params).appendTo( $('body').get(0) );
 
 	// Game loop
 	setInterval( function(){
 		update();
-	}, 1000/GAME_SPEED);
-
-
-	function draw() {
-		canvas.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-		for( var x = 0; x < testNodes.length; x++ ){
-			testNodes[x].planetRenderer.draw();
-		}
-		for( var x = 0; x < testConns.length; x++ ){
-			testConns[x].connectionRenderer.draw();
-		}
-	}
+	}, GAME_SPEED);
 
 	function update() {
 
@@ -59,8 +31,5 @@ $(document).ready(function() {
 
 	console.log(testNodes);
 	console.log(testConns)
-	//testNodes[0].getEdgePoint( testNodes[1] );
-
-
 
 });

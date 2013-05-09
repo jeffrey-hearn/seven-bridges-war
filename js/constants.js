@@ -1,7 +1,3 @@
 // Constants
-var	  CANVAS_WIDTH = 700
-	, CANVAS_HEIGHT = 500
-	, FPS = 30
-	, GAME_SPEED = 2
-	, ORBITAL_SPEED = 0.008
-	, PLANET_RADIUS = 20;
+var	  GAME_SPEED = 500  // update game elements every Xms
+
