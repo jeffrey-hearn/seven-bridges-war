@@ -8,7 +8,7 @@ $(document).ready(function() {
 	var params = {
 		fullscreen: true,
 		autostart: true, 
-		type: Two.Types.canvas
+		type: Two.Types.svg
 	};
 	window.two = new Two(params).appendTo( $('body').get(0) );
 
