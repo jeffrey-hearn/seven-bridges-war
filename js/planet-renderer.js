@@ -1,69 +1,80 @@
 
+var   ORBITAL_SPEED = 0.009
+	, PEACEFUL_ORBITERS = 10
+	, ORBITER_LENGTH = 0.01 * 2 * Math.PI
+	, PLANET_RADIUS = 13;
+
 function PlanetRenderer( planet, x, y ){
 	this.planet = planet;
-	// Rendering Suff
-	this.planetRadius = PLANET_RADIUS;
+
 	this.x = x;
 	this.y = y;
+
 	this.lowOrbit = PLANET_RADIUS + PLANET_RADIUS * 0.3;
 	this.highOrbit = PLANET_RADIUS + PLANET_RADIUS * 1;
 	this.midOrbit = (this.lowOrbit + this.highOrbit) / 2;
-	this.orbiterAngles = new Array(16);
-	this.init();
-}
 
-PlanetRenderer.prototype.getCoords = function(){
-	return { x: this.x, y: this.y };
-}
+	this.planetPolygon = two.makeCircle(x, y, PLANET_RADIUS);
+	this.planetPolygon.fill = this.planet.owner.primaryColor;
+	this.planetPolygon.noStroke();
 
-PlanetRenderer.prototype.init = function(){
 	this.initOrbiters();
 }
 
+// Creates set of points interpolated along the
+// curve of a circle
+//		circle is a coord object { x: 1, y: 3 }
+//		angles in radians
+//		resolution is the number of tween points
+function arcPointsGivenAngle ( center, radius, begAngle, endAngle, resolution ) {
+	var a = []
+	if ( resolution == 0 )
+		var step = endAngle - begAngle;
+	else
+		var step = (endAngle - begAngle) / resolution;
+	for ( var i = begAngle; i <= endAngle; i += step ) {
+		a.push( coordOnCircle( center, radius, i ) );
+	}
+	return a;
+}
+
+function coordOnCircle ( center, radius, theta ) {
+	return new Two.Vector(
+		center.x + radius * Math.sin( theta ),
+		center.y + radius * Math.cos( theta )
+		);
+}
+
+PlanetRenderer.prototype.coords = function(){
+	return { x: this.x, y: this.y };
+}
+
 PlanetRenderer.prototype.initOrbiters = function(){
-	for( var x = 0; x < this.orbiterAngles.length; x++ ){
-		this.orbiterAngles[x] = Math.random() * 2 * Math.PI;
+
+	this.orbiterGroup = two.makeGroup();
+
+	for ( var i = 0; i < PEACEFUL_ORBITERS; i++ ) {
+		// Add an arc to the top of the circle in the group
+		var theta = Math.random() * 2 * Math.PI;
+		var e = two.makeCurve( arcPointsGivenAngle(
+			{ x: 0, y: 0 },
+			this.lowOrbit,
+			theta,
+			theta + ORBITER_LENGTH,
+			5
+			), true );
+		e.noFill();
+		e.stroke = this.planet.owner.secondaryColor;
+		e.linewidth = 2;
+		this.orbiterGroup.add( e );
 	}
+
+	this.orbiterGroup.translation.set( this.x, this.y );
+
+	var scope = this;
+	two.bind('update', function( frameCount ) {
+		scope.orbiterGroup.rotation += ORBITAL_SPEED * 2 * Math.PI;
+	});
+
 }
 
-PlanetRenderer.prototype.ambience = function(){
-	if( this.planet.posture == 'peaceful' ){
-		this.orbitOrbiter();
-	}
-}
-
-PlanetRenderer.prototype.orbitOrbiter = function(){
-	for( var x = 0; x < this.orbiterAngles.length; x++ ){
-		this.orbiterAngles[x] += ORBITAL_SPEED;
-		if ( this.orbiterAngles[x] > (2 * Math.PI) )
-			this.orbiterAngles[x] = this.orbiterAngles[x] - (2 * Math.PI);
-	}
-}
-
-PlanetRenderer.prototype.drawOrbiters = function(){
-	if( this.planet.posture == 'peaceful' ){
-		for( var x = 0; x < this.orbiterAngles.length; x++ ){
-			canvas.beginPath();
-			canvas.arc(this.x, this.y, this.lowOrbit, this.orbiterAngles[x], this.orbiterAngles[x] + 0.02 * Math.PI, false);
-			canvas.lineWidth = 1;
-			canvas.strokeStyle = this.planet.owner.secondaryColor;
-			canvas.stroke();
-		}
-	}
-}
-
-PlanetRenderer.prototype.drawPlanet = function(){
-	canvas.beginPath();
-	canvas.arc(this.x, this.y, this.planetRadius, 0, 2 * Math.PI, false);
-	canvas.fillStyle = this.planet.owner.primaryColor;
-	canvas.fill();
-	canvas.lineWidth = 3;
-	canvas.strokeStyle = this.planet.owner.secondaryColor;
-	canvas.stroke();
-}
-
-PlanetRenderer.prototype.draw = function(){
-	this.ambience();
-	this.drawPlanet();
-	this.drawOrbiters();
-}

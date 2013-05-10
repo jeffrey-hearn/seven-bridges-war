@@ -1,7 +1,6 @@
 
 $(document).ready(function() {
 
-
 	console.log('Starting up...');
 
 	//var elem = document.getElementById('draw-shapes').children[0];
@@ -10,7 +9,7 @@ $(document).ready(function() {
 		autostart: true, 
 		type: Two.Types.svg
 	};
-	window.two = new Two(params).appendTo( $('body').get(0) );
+	window.two = new Two(params).appendTo( document.body );
 
 	// Game loop
 	setInterval( function(){
@@ -23,11 +22,6 @@ $(document).ready(function() {
 
 	var player1 = new Player("#9B59B6", "#8E44AD");
 
-	var testNodes = [];
-	//testNodes.push( new Planet(player1,300,200) );
-	//testNodes.push( new Planet(player1,450,100) );
-	//testNodes.push( new Planet(player1,600,150) );
-
 	// Poisson Disk Map
 	// width, height, min dist between points, sample frequency
 	var padding = 75;
@@ -38,6 +32,7 @@ $(document).ready(function() {
 		30
 		);
 	var solution = sampler.sampleUntilSolution();
+	var testNodes = [];
 	solution.forEach( function ( point, index, array ) {
 		testNodes.push( new Planet( player1, point.x + padding, point.y + padding ));
 	});
