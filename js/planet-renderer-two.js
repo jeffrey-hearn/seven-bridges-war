@@ -1,8 +1,8 @@
 
-var   ORBITAL_SPEED = 0.008
-	, PEACEFUL_ORBITERS = 16
-	, ORBITER_LENGTH = 0.2 * 2 * Math.PI
-	, PLANET_RADIUS = 20;
+var   ORBITAL_SPEED = 0.009
+	, PEACEFUL_ORBITERS = 10
+	, ORBITER_LENGTH = 0.01 * 2 * Math.PI
+	, PLANET_RADIUS = 13;
 
 function PlanetRenderer( planet, x, y ){
 	this.planet = planet;
@@ -21,24 +21,28 @@ function PlanetRenderer( planet, x, y ){
 	this.initOrbiters();
 }
 
-// Creates beginning, middle, and endpoints for an arc
-// as Two.Vector's that can be fed into two.makeCurve
-// (sort of the way canvas does arcs, with an arc
-// measured in radians instead of as interpolated points)
-function arcPointsGivenAngle ( centerCoords, radius, theta ) {
-	mid = new Two.Vector(
-		centerCoords.x,
-		centerCoords.y + radius
+// Creates set of points interpolated along the
+// curve of a circle
+//		circle is a coord object { x: 1, y: 3 }
+//		angles in radians
+//		resolution is the number of tween points
+function arcPointsGivenAngle ( center, radius, begAngle, endAngle, resolution ) {
+	var a = []
+	if ( resolution == 0 )
+		var step = endAngle - begAngle;
+	else
+		var step = (endAngle - begAngle) / resolution;
+	for ( var i = begAngle; i <= endAngle; i += step ) {
+		a.push( coordOnCircle( center, radius, i ) );
+	}
+	return a;
+}
+
+function coordOnCircle ( center, radius, theta ) {
+	return new Two.Vector(
+		center.x + radius * Math.sin( theta ),
+		center.y + radius * Math.cos( theta )
 		);
-	beg = new Two.Vector(
-		centerCoords.x + radius * Math.sin( theta ),
-		centerCoords.y + radius * Math.cos( theta )
-		);
-	end = new Two.Vector(
-		centerCoords.x + radius * Math.sin( theta ) * -1,
-		beg.y
-		);
-	return [ beg, mid, end ];
 }
 
 PlanetRenderer.prototype.coords = function(){
@@ -47,29 +51,40 @@ PlanetRenderer.prototype.coords = function(){
 
 PlanetRenderer.prototype.initOrbiters = function(){
 
-	var boundingCircle = two.makeCircle( this.x, this.y, this.midOrbit * 1.25 );
+	/*
+	var boundingCircle = two.makeCircle( 0, 0, this.midOrbit );
 	boundingCircle.noFill();
-	this.orbiterGroup = two.makeGroup( boundingCircle );
+	boundingCircle.stroke = this.planet.owner.secondaryColor;
+	boundingCircle.linewidth = 0.3;
+	*/
+	this.orbiterGroup = two.makeGroup(  );
 
-	// for ( var i = 0; i < PEACEFUL_ORBITERS; i++ ) {
-	for ( var i = 0; i < 1; i++ ) {
+	for ( var i = 0; i < PEACEFUL_ORBITERS; i++ ) {
 		// Add an arc to the top of the circle in the group
+		var theta = Math.random() * 2 * Math.PI;
 		var e = two.makeCurve( arcPointsGivenAngle(
-			this.coords(),
-			this.midOrbit,
-			ORBITER_LENGTH
+			{ x: 0, y: 0 },
+			this.lowOrbit,
+			theta,
+			theta + ORBITER_LENGTH,
+			5
 			), true );
 		e.noFill();
 		e.stroke = this.planet.owner.secondaryColor;
-		e.linewidth = 3;
+		e.linewidth = 2;
 		this.orbiterGroup.add( e );
-		// rotate the group to a random point
-		this.orbiterGroup.center();
-
-		this.orbiterGroup.rotation = Math.random() * 2 * Math.PI;
-		this.orbiterGroup.translation.set( this.x, this.y );
+		//this.orbiterGroup.center();
+		//this.orbiterGroup.rotation = Math.random() * 2 * Math.PI;
+		//two.update();
 	}
 
+	//this.orbiterGroup.center();
+	this.orbiterGroup.translation.set( this.x, this.y );
+
+	var scope = this;
+	two.bind('update', function( frameCount ) {
+		scope.orbiterGroup.rotation += ORBITAL_SPEED * 2 * Math.PI;
+	});
 
 }
 
